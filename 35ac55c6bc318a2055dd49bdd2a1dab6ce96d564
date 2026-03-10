@@ -1,0 +1,33 @@
+lib/cache.zsh
+  b4301419c6d5e19b 1-102
+lib/version-checker.zsh
+  b4301419c6d5e19b 1-83
+README.md
+  b4301419c6d5e19b 1-288
+lib/ui.zsh
+  b4301419c6d5e19b 1-203
+cli-update.plugin.zsh
+  b4301419c6d5e19b 1-165
+lib/npm-tools.zsh
+  b4301419c6d5e19b 1-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "35ac55c6bc318a2055dd49bdd2a1dab6ce96d564",
+  "prompts": {
+    "b4301419c6d5e19b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "218c44de-d6ff-4cb6-bad8-3d2ee0d0a99f",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>",
+      "messages": [],
+      "total_additions": 991,
+      "total_deletions": 1,
+      "accepted_lines": 990,
+      "overriden_lines": 0
+    }
+  }
+}
