@@ -1,0 +1,23 @@
+lib/ui.zsh
+  5c83e738b88e9845 34-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "47d7838cde180e074f1cf6b1ea6bd17d13e3b776",
+  "prompts": {
+    "5c83e738b88e9845": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2bc7b42a-8ff9-4f0b-a473-2ed65c961c91",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>",
+      "messages": [],
+      "total_additions": 6,
+      "total_deletions": 0,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    }
+  }
+}
