@@ -1,0 +1,149 @@
+#!/usr/bin/env zsh
+
+# NPM tool detection and version management
+
+# Tool to npm package mapping
+typeset -gA CLI_NPM_PACKAGES
+CLI_NPM_PACKAGES=(
+  gemini     "@google/gemini-cli"
+  claude     "claude-code"
+  copilot    "@github/copilot"
+  codex      "@openai/codex"
+)
+
+# Tool to version command mapping
+typeset -gA CLI_VERSION_COMMANDS
+CLI_VERSION_COMMANDS=(
+  gemini     "gemini --version"
+  claude     "claude --version"
+  copilot    "gh copilot --version"
+  codex      "codex --version"
+)
+
+# Check if a tool is installed
+_cli_is_tool_installed() {
+  local tool="$1"
+  local cmd="${tool}"
+
+  # Special case for copilot (uses gh CLI)
+  [[ "$tool" == "copilot" ]] && cmd="gh"
+
+  command -v "$cmd" &>/dev/null
+}
+
+# Get current installed version of a tool
+_cli_get_current_version() {
+  local tool="$1"
+
+  # Check if tool is installed
+  if ! _cli_is_tool_installed "$tool"; then
+    return 1
+  fi
+
+  local version_cmd="${CLI_VERSION_COMMANDS[$tool]}"
+  [[ -z "$version_cmd" ]] && return 1
+
+  # Execute version command with timeout
+  local output
+  output=$(eval "$version_cmd" 2>&1 | head -n 10)
+
+  # Extract version from output
+  local version="$(_cli_extract_version "$output")"
+
+  if [[ -n "$version" ]]; then
+    echo "$version"
+    return 0
+  fi
+
+  return 1
+}
+
+# Get latest version from npm registry
+_cli_get_latest_version() {
+  local tool="$1"
+  local package="${CLI_NPM_PACKAGES[$tool]}"
+
+  [[ -z "$package" ]] && return 1
+
+  # Check if npm is available
+  if ! command -v npm &>/dev/null; then
+    return 1
+  fi
+
+  # Query npm registry with timeout
+  # Using npm view instead of npm show for better reliability
+  local output
+  output=$(timeout 5s npm view "$package" version 2>/dev/null)
+
+  if [[ $? -eq 0 && -n "$output" ]]; then
+    # npm view returns just the version number
+    local version="$(_cli_extract_version "$output")"
+    if [[ -n "$version" ]]; then
+      echo "$version"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+# Check if a tool has an available update
+# Returns 0 if update is available, 1 otherwise
+# Stores current and latest versions in global variables for caller
+_cli_check_tool_update() {
+  local tool="$1"
+
+  # Global variables to store versions
+  typeset -g CLI_TOOL_CURRENT CLI_TOOL_LATEST
+
+  # Check if tool is in our supported list
+  if [[ -z "${CLI_NPM_PACKAGES[$tool]}" ]]; then
+    return 1
+  fi
+
+  # Check if tool is installed
+  if ! _cli_is_tool_installed "$tool"; then
+    return 1
+  fi
+
+  # Get current version
+  CLI_TOOL_CURRENT="$(_cli_get_current_version "$tool")"
+  if [[ -z "$CLI_TOOL_CURRENT" ]]; then
+    return 1
+  fi
+
+  # Get latest version from npm
+  CLI_TOOL_LATEST="$(_cli_get_latest_version "$tool")"
+  if [[ -z "$CLI_TOOL_LATEST" ]]; then
+    # Try to use cached version if available
+    if _cli_get_cached_info "$tool"; then
+      CLI_TOOL_LATEST="$CLI_CACHED_LATEST"
+    else
+      return 1
+    fi
+  else
+    # Cache the version info
+    _cli_cache_version_info "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+  fi
+
+  # Compare versions
+  if _cli_update_check_versions "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"; then
+    return 0  # Update available
+  fi
+
+  return 1  # No update needed
+}
+
+# Get the npm package name for a tool
+_cli_get_package_name() {
+  local tool="$1"
+  echo "${CLI_NPM_PACKAGES[$tool]}"
+}
+
+# Check if npm is available
+_cli_check_npm_available() {
+  if ! command -v npm &>/dev/null; then
+    return 1
+  fi
+  return 0
+}
