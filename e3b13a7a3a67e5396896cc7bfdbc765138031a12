@@ -1,0 +1,31 @@
+lib/cache.zsh
+  d12ab30a10169320 3,7-8,21,27-28,35-36,49-51,58,63,69,76,78,98-99
+lib/ui.zsh
+  d12ab30a10169320 3,6,24,27,32,36,39,45,51,55,69,75,79,83,89,93,111,124,138,147,151,155,170,178,185
+lib/version-checker.zsh
+  d12ab30a10169320 3,9,38,43-44,69,79
+README.md
+  d12ab30a10169320 1,3,36-37,40,45,63,66,69,72,75,84,91,98,105,112,119,126,132,138,144,181,195-197,230-231,238-240,283-284
+lib/npm-tools.zsh
+  d12ab30a10169320 24,35,39,51,62,80,93,105,110,116,119,126,130,138,144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "e3b13a7a3a67e5396896cc7bfdbc765138031a12",
+  "prompts": {
+    "d12ab30a10169320": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b804768-17c2-4c1c-ba86-cb88bba8db8a",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>",
+      "messages": [],
+      "total_additions": 139,
+      "total_deletions": 139,
+      "accepted_lines": 139,
+      "overriden_lines": 0
+    }
+  }
+}
