@@ -1,0 +1,25 @@
+ai-cli.plugin.zsh
+  3d9af7f2d585fa56 25-27,161-289,298
+README.md
+  3d9af7f2d585fa56 76-79,119-125,158-193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "1d343b213ead0755d49d5ba1bc2fae31de6ee6ea",
+  "prompts": {
+    "3d9af7f2d585fa56": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0a65b4ff-0208-4241-b68d-6d830f6f59b9",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>",
+      "messages": [],
+      "total_additions": 180,
+      "total_deletions": 0,
+      "accepted_lines": 180,
+      "overriden_lines": 0
+    }
+  }
+}
