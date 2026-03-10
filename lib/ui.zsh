@@ -31,6 +31,12 @@ _aicli_show_update_notification() {
 
   local style="${AICLI_NOTIFICATION_STYLE:-prompt}"
 
+  # If stdin is not available (background process) and style is interactive,
+  # fall back to non-interactive banner mode
+  if [[ ! -t 0 ]] && [[ "$style" == "prompt" ]]; then
+    style="banner"
+  fi
+
   case "$style" in
     prompt)
       _aicli_prompt_update "$tool" "$current" "$latest"
