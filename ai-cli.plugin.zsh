@@ -22,6 +22,9 @@ fi
 # Cache directory location
 : ${AICLI_CACHE_DIR:=${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/ai-cli}
 
+# Auto-upgrade confirmation (set to true to require confirmation before upgrades)
+: ${AICLI_AUTO_UPGRADE_CONFIRM:=false}
+
 # Check if npm is available
 if ! command -v npm &>/dev/null; then
   # Silently disable plugin if npm is not available
@@ -155,6 +158,135 @@ ai-cli-check() {
   _aicli_update_last_check
 }
 
+# Upgrade command
+ai-cli-upgrade() {
+  # Parse flags
+  local require_confirm=${AICLI_AUTO_UPGRADE_CONFIRM:-false}
+  local specific_tools=()
+  local force=false
+
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --confirm|-c)
+        require_confirm=true
+        shift
+        ;;
+      --force|-f)
+        force=true
+        shift
+        ;;
+      --help|-h)
+        echo "Usage: ai-cli-upgrade [OPTIONS] [TOOL...]"
+        echo ""
+        echo "Upgrade AI CLI tools with available updates"
+        echo ""
+        echo "Options:"
+        echo "  --confirm, -c   Require confirmation for each tool upgrade"
+        echo "  --force, -f     Force check, ignore cache"
+        echo "  --help, -h      Show this help message"
+        echo ""
+        echo "Tools: gemini, claude, copilot, codex"
+        echo ""
+        echo "Examples:"
+        echo "  ai-cli-upgrade              # Upgrade all tools automatically"
+        echo "  ai-cli-upgrade --confirm    # Upgrade with confirmation"
+        echo "  ai-cli-upgrade gemini       # Upgrade only gemini"
+        echo "  ai-cli-upgrade claude gemini # Upgrade multiple tools"
+        echo "  ai-cli-upgrade --force      # Force check and upgrade"
+        return 0
+        ;;
+      *)
+        specific_tools+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  # Check npm availability
+  if ! _aicli_check_npm_available; then
+    _aicli_show_status "Error: npm is required for upgrades" "error"
+    return 1
+  fi
+
+  # Determine which tools to check
+  local tools_to_check=("${specific_tools[@]}")
+  if [[ ${#tools_to_check[@]} -eq 0 ]]; then
+    tools_to_check=("${AICLI_TOOLS[@]}")
+  fi
+
+  # Force check by clearing cache if requested
+  if [[ "$force" == "true" ]]; then
+    _aicli_clear_cache
+  fi
+
+  # Find tools with available updates
+  local tools_to_upgrade=()
+
+  for tool in "${tools_to_check[@]}"; do
+    # Skip if tool not installed
+    if ! _aicli_is_tool_installed "$tool"; then
+      continue
+    fi
+
+    # Check for updates
+    if _aicli_check_tool_update "$tool"; then
+      tools_to_upgrade+=("$tool:${CLI_TOOL_CURRENT}:${CLI_TOOL_LATEST}")
+    fi
+  done
+
+  # If no updates available
+  if [[ ${#tools_to_upgrade[@]} -eq 0 ]]; then
+    echo ""
+    _aicli_show_status "All tools are up-to-date!" "success"
+    echo ""
+    return 0
+  fi
+
+  # Show what will be upgraded
+  echo ""
+  echo -e "${CLI_COLOR_CYAN}Found ${#tools_to_upgrade[@]} update(s) available:${CLI_COLOR_RESET}"
+  echo ""
+
+  for update_info in "${tools_to_upgrade[@]}"; do
+    local tool="${update_info%%:*}"
+    local rest="${update_info#*:}"
+    local current="${rest%%:*}"
+    local latest="${rest##*:}"
+    echo -e "  ${CLI_COLOR_YELLOW}${tool}${CLI_COLOR_RESET}: ${CLI_COLOR_RED}${current}${CLI_COLOR_RESET} → ${CLI_COLOR_GREEN}${latest}${CLI_COLOR_RESET}"
+  done
+  echo ""
+
+  # Upgrade each tool
+  for update_info in "${tools_to_upgrade[@]}"; do
+    local tool="${update_info%%:*}"
+    local rest="${update_info#*:}"
+    local current="${rest%%:*}"
+    local latest="${rest##*:}"
+    local package="$(_aicli_get_package_name "$tool")"
+
+    # Ask for confirmation if required
+    if [[ "$require_confirm" == "true" ]]; then
+      echo -n "Upgrade ${tool} from ${current} to ${latest}? [Y/n] "
+      read -r response
+
+      case "$response" in
+        n|N|no|No|NO)
+          echo "Skipped ${tool}"
+          echo ""
+          continue
+          ;;
+      esac
+    fi
+
+    # Run the upgrade
+    _aicli_run_update "$tool" "$package"
+  done
+
+  # Update last check timestamp
+  _aicli_update_last_check
+}
+
 # Register the precmd hook
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd _aicli_update_check_hook
@@ -163,3 +295,4 @@ add-zsh-hook precmd _aicli_update_check_hook
 # (zsh automatically makes functions available, but we document it here)
 # Commands available:
 #   ai-cli-check        - Manual check for updates
+#   ai-cli-upgrade      - Upgrade tools with available updates

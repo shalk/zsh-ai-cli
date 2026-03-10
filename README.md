@@ -73,6 +73,10 @@ AICLI_NOTIFICATION_STYLE="prompt"
 
 # Cache directory location (default: ZSH cache dir)
 AICLI_CACHE_DIR="${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/ai-cli"
+
+# Auto-upgrade confirmation (default: false)
+# Set to true to require confirmation before each tool upgrade
+AICLI_AUTO_UPGRADE_CONFIRM=false
 ```
 
 ### Configuration Examples
@@ -112,6 +116,13 @@ AICLI_AUTO_CHECK=false
 AICLI_TOOLS=(${AICLI_TOOLS[@]:#codex})
 ```
 
+#### Require confirmation for upgrades
+
+```bash
+# Always require confirmation before upgrading tools
+AICLI_AUTO_UPGRADE_CONFIRM=true
+```
+
 ## Usage
 
 ### Automatic Checks
@@ -142,6 +153,42 @@ ai-cli-check --force
 
 ```bash
 ai-cli-check --help
+```
+
+#### Upgrade all configured tools automatically
+
+```bash
+ai-cli-upgrade
+```
+
+#### Upgrade with confirmation for each tool
+
+```bash
+ai-cli-upgrade --confirm
+```
+
+#### Upgrade a specific tool
+
+```bash
+ai-cli-upgrade gemini
+```
+
+#### Upgrade multiple specific tools
+
+```bash
+ai-cli-upgrade claude gemini
+```
+
+#### Force check and upgrade (ignore cache)
+
+```bash
+ai-cli-upgrade --force
+```
+
+#### Show upgrade help
+
+```bash
+ai-cli-upgrade --help
 ```
 
 ## Notification Styles
