@@ -21,7 +21,7 @@ CLI_VERSION_COMMANDS=(
 )
 
 # Check if a tool is installed
-_cli_is_tool_installed() {
+_aicli_is_tool_installed() {
   local tool="$1"
   local cmd="${tool}"
 
@@ -32,11 +32,11 @@ _cli_is_tool_installed() {
 }
 
 # Get current installed version of a tool
-_cli_get_current_version() {
+_aicli_get_current_version() {
   local tool="$1"
 
   # Check if tool is installed
-  if ! _cli_is_tool_installed "$tool"; then
+  if ! _aicli_is_tool_installed "$tool"; then
     return 1
   fi
 
@@ -48,7 +48,7 @@ _cli_get_current_version() {
   output=$(eval "$version_cmd" 2>&1 | head -n 10)
 
   # Extract version from output
-  local version="$(_cli_extract_version "$output")"
+  local version="$(_aicli_extract_version "$output")"
 
   if [[ -n "$version" ]]; then
     echo "$version"
@@ -59,7 +59,7 @@ _cli_get_current_version() {
 }
 
 # Get latest version from npm registry
-_cli_get_latest_version() {
+_aicli_get_latest_version() {
   local tool="$1"
   local package="${CLI_NPM_PACKAGES[$tool]}"
 
@@ -77,7 +77,7 @@ _cli_get_latest_version() {
 
   if [[ $? -eq 0 && -n "$output" ]]; then
     # npm view returns just the version number
-    local version="$(_cli_extract_version "$output")"
+    local version="$(_aicli_extract_version "$output")"
     if [[ -n "$version" ]]; then
       echo "$version"
       return 0
@@ -90,7 +90,7 @@ _cli_get_latest_version() {
 # Check if a tool has an available update
 # Returns 0 if update is available, 1 otherwise
 # Stores current and latest versions in global variables for caller
-_cli_check_tool_update() {
+_aicli_check_tool_update() {
   local tool="$1"
 
   # Global variables to store versions
@@ -102,32 +102,32 @@ _cli_check_tool_update() {
   fi
 
   # Check if tool is installed
-  if ! _cli_is_tool_installed "$tool"; then
+  if ! _aicli_is_tool_installed "$tool"; then
     return 1
   fi
 
   # Get current version
-  CLI_TOOL_CURRENT="$(_cli_get_current_version "$tool")"
+  CLI_TOOL_CURRENT="$(_aicli_get_current_version "$tool")"
   if [[ -z "$CLI_TOOL_CURRENT" ]]; then
     return 1
   fi
 
   # Get latest version from npm
-  CLI_TOOL_LATEST="$(_cli_get_latest_version "$tool")"
+  CLI_TOOL_LATEST="$(_aicli_get_latest_version "$tool")"
   if [[ -z "$CLI_TOOL_LATEST" ]]; then
     # Try to use cached version if available
-    if _cli_get_cached_info "$tool"; then
+    if _aicli_get_cached_info "$tool"; then
       CLI_TOOL_LATEST="$CLI_CACHED_LATEST"
     else
       return 1
     fi
   else
     # Cache the version info
-    _cli_cache_version_info "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+    _aicli_cache_version_info "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
   fi
 
   # Compare versions
-  if _cli_update_check_versions "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"; then
+  if _aicli_update_check_versions "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"; then
     return 0  # Update available
   fi
 
@@ -135,13 +135,13 @@ _cli_check_tool_update() {
 }
 
 # Get the npm package name for a tool
-_cli_get_package_name() {
+_aicli_get_package_name() {
   local tool="$1"
   echo "${CLI_NPM_PACKAGES[$tool]}"
 }
 
 # Check if npm is available
-_cli_check_npm_available() {
+_aicli_check_npm_available() {
   if ! command -v npm &>/dev/null; then
     return 1
   fi

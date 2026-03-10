@@ -1,12 +1,12 @@
 #!/usr/bin/env zsh
 
-# Version comparison logic for CLI tools
+# Version comparison logic for AI CLI tools
 
 # Load zsh's is-at-least function
 autoload -Uz is-at-least
 
 # Clean version string by removing common prefixes and whitespace
-_cli_clean_version() {
+_aicli_clean_version() {
   local version="$1"
 
   # Remove common prefixes
@@ -35,13 +35,13 @@ _cli_clean_version() {
 # Returns 0 if update is available (latest > current)
 # Returns 1 if current is up-to-date (current >= latest)
 # Returns 2 if versions are invalid
-_cli_update_check_versions() {
+_aicli_update_check_versions() {
   local current="$1"
   local latest="$2"
 
   # Clean both versions
-  current="$(_cli_clean_version "$current")"
-  latest="$(_cli_clean_version "$latest")"
+  current="$(_aicli_clean_version "$current")"
+  latest="$(_aicli_clean_version "$latest")"
 
   # Validate versions are not empty
   if [[ -z "$current" || -z "$latest" ]]; then
@@ -66,7 +66,7 @@ _cli_update_check_versions() {
 
 # Extract version number from command output
 # Handles various output formats from different tools
-_cli_extract_version() {
+_aicli_extract_version() {
   local output="$1"
 
   # Try to extract semantic version (x.y.z)
@@ -76,7 +76,7 @@ _cli_extract_version() {
 }
 
 # Validate that a version string looks reasonable
-_cli_is_valid_version() {
+_aicli_is_valid_version() {
   local version="$1"
 
   [[ -n "$version" ]] && [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]

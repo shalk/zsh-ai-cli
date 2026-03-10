@@ -1,6 +1,6 @@
-# CLI Update Checker - Oh-My-Zsh Plugin
+# AI CLI Update Checker - Oh-My-Zsh Plugin
 
-An Oh-My-Zsh plugin that automatically checks for updates to your CLI development tools and notifies you when new versions are available.
+An Oh-My-Zsh plugin that automatically checks for updates to your AI CLI development tools and notifies you when new versions are available.
 
 ## Features
 
@@ -33,16 +33,16 @@ An Oh-My-Zsh plugin that automatically checks for updates to your CLI developmen
 1. Clone this repository to your Oh-My-Zsh custom plugins directory:
 
 ```bash
-git clone https://github.com/shalk/cli-update \
-  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/cli-update
+git clone https://github.com/shalk/zsh-ai-cli \
+  ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/ai-cli
 ```
 
-2. Add `cli-update` to your plugins in `~/.zshrc`:
+2. Add `ai-cli` to your plugins in `~/.zshrc`:
 
 ```bash
 plugins=(
   # ... other plugins
-  cli-update
+  ai-cli
 )
 ```
 
@@ -60,19 +60,19 @@ All configuration options should be set in your `~/.zshrc` **before** the line t
 
 ```bash
 # Which tools to check for updates (default: all supported tools)
-CLI_UPDATE_TOOLS=(gemini claude copilot codex)
+AICLI_TOOLS=(gemini claude copilot codex)
 
 # How often to check for updates, in days (default: 7)
-CLI_UPDATE_CHECK_INTERVAL=7
+AICLI_CHECK_INTERVAL=7
 
 # Enable automatic checking on shell start (default: true)
-CLI_UPDATE_AUTO_CHECK=true
+AICLI_AUTO_CHECK=true
 
 # Notification style: prompt, banner, or silent (default: prompt)
-CLI_UPDATE_NOTIFICATION_STYLE="prompt"
+AICLI_NOTIFICATION_STYLE="prompt"
 
 # Cache directory location (default: ZSH cache dir)
-CLI_UPDATE_CACHE_DIR="${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/cli-update"
+AICLI_CACHE_DIR="${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/ai-cli"
 ```
 
 ### Configuration Examples
@@ -81,67 +81,67 @@ CLI_UPDATE_CACHE_DIR="${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/cli-update"
 
 ```bash
 # Only check Gemini and Claude
-CLI_UPDATE_TOOLS=(gemini claude)
+AICLI_TOOLS=(gemini claude)
 ```
 
 #### Check more frequently
 
 ```bash
 # Check every 3 days instead of 7
-CLI_UPDATE_CHECK_INTERVAL=3
+AICLI_CHECK_INTERVAL=3
 ```
 
 #### Use banner notifications
 
 ```bash
 # Non-interactive banner instead of prompts
-CLI_UPDATE_NOTIFICATION_STYLE="banner"
+AICLI_NOTIFICATION_STYLE="banner"
 ```
 
 #### Disable automatic checks
 
 ```bash
 # Disable automatic checks, only use manual command
-CLI_UPDATE_AUTO_CHECK=false
+AICLI_AUTO_CHECK=false
 ```
 
 #### Remove a specific tool from checks
 
 ```bash
 # Remove codex from the default list
-CLI_UPDATE_TOOLS=(${CLI_UPDATE_TOOLS[@]:#codex})
+AICLI_TOOLS=(${AICLI_TOOLS[@]:#codex})
 ```
 
 ## Usage
 
 ### Automatic Checks
 
-When `CLI_UPDATE_AUTO_CHECK=true` (default), the plugin automatically checks for updates based on your configured interval. Updates are checked in the background and won't block your shell prompt.
+When `AICLI_AUTO_CHECK=true` (default), the plugin automatically checks for updates based on your configured interval. Updates are checked in the background and won't block your shell prompt.
 
 ### Manual Commands
 
 #### Check all configured tools
 
 ```bash
-cli-update-check
+ai-cli-check
 ```
 
 #### Check a specific tool
 
 ```bash
-cli-update-check gemini
+ai-cli-check gemini
 ```
 
 #### Force check (ignore cache)
 
 ```bash
-cli-update-check --force
+ai-cli-check --force
 ```
 
 #### Show help
 
 ```bash
-cli-update-check --help
+ai-cli-check --help
 ```
 
 ## Notification Styles
@@ -178,7 +178,7 @@ Non-interactive notification with update command:
 
 ### Silent Mode
 
-No notifications displayed. Updates are detected and cached, but you need to run `cli-update-check` manually to see them.
+No notifications displayed. Updates are detected and cached, but you need to run `ai-cli-check` manually to see them.
 
 ## How It Works
 
@@ -192,9 +192,9 @@ No notifications displayed. Updates are detected and cached, but you need to run
 
 The plugin caches version information to avoid excessive npm registry queries:
 
-- Cache location: `${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/cli-update`
-- Cache duration: Configurable via `CLI_UPDATE_CHECK_INTERVAL` (default: 7 days)
-- Force refresh: Use `cli-update-check --force` to ignore cache
+- Cache location: `${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/ai-cli`
+- Cache duration: Configurable via `AICLI_CHECK_INTERVAL` (default: 7 days)
+- Force refresh: Use `ai-cli-check --force` to ignore cache
 
 Cache files:
 - `last_check.cache` - Timestamp of last check
@@ -227,17 +227,17 @@ The plugin only checks installed tools.
 
 Clear the cache and check again:
 ```bash
-rm -rf ${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/cli-update
-cli-update-check --force
+rm -rf ${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/ai-cli
+ai-cli-check --force
 ```
 
 ### Check plugin configuration
 
 Verify your configuration:
 ```bash
-echo $CLI_UPDATE_TOOLS
-echo $CLI_UPDATE_CHECK_INTERVAL
-echo $CLI_UPDATE_NOTIFICATION_STYLE
+echo $AICLI_TOOLS
+echo $AICLI_CHECK_INTERVAL
+echo $AICLI_NOTIFICATION_STYLE
 ```
 
 ## Performance
@@ -280,8 +280,8 @@ Created by [shalk](https://github.com/shalk)
 
 ## Support
 
-- Report issues: [GitHub Issues](https://github.com/shalk/cli-update/issues)
-- Feature requests: [GitHub Discussions](https://github.com/shalk/cli-update/discussions)
+- Report issues: [GitHub Issues](https://github.com/shalk/zsh-ai-cli/issues)
+- Feature requests: [GitHub Discussions](https://github.com/shalk/zsh-ai-cli/discussions)
 
 ---
 

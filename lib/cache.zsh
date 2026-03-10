@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
 
-# Cache management for CLI update checker
+# Cache management for AI CLI update checker
 # Prevents excessive npm registry queries
 
 # Get cache directory, create if needed
-_cli_get_cache_dir() {
-  local cache_dir="${CLI_UPDATE_CACHE_DIR:-${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/cli-update}"
+_aicli_get_cache_dir() {
+  local cache_dir="${AICLI_CACHE_DIR:-${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/ai-cli}"
 
   if [[ ! -d "$cache_dir" ]]; then
     mkdir -p "$cache_dir" 2>/dev/null || {
@@ -18,22 +18,22 @@ _cli_get_cache_dir() {
 }
 
 # Get current day as epoch (days since Unix epoch)
-_cli_current_epoch() {
+_aicli_current_epoch() {
   echo $(( $(date +%s) / 86400 ))
 }
 
 # Check if we should run update checks based on interval
 # Returns 0 (true) if check should run, 1 (false) if within interval
-_cli_should_check_updates() {
-  local cache_dir="$(_cli_get_cache_dir)" || return 0
+_aicli_should_check_updates() {
+  local cache_dir="$(_aicli_get_cache_dir)" || return 0
   local last_check_file="$cache_dir/last_check.cache"
 
   # If cache file doesn't exist, we should check
   [[ ! -f "$last_check_file" ]] && return 0
 
   local last_check=$(cat "$last_check_file" 2>/dev/null)
-  local current_epoch=$(_cli_current_epoch)
-  local interval="${CLI_UPDATE_CHECK_INTERVAL:-7}"
+  local current_epoch=$(_aicli_current_epoch)
+  local interval="${AICLI_CHECK_INTERVAL:-7}"
 
   # If we can't read last check or it's malformed, check anyway
   [[ -z "$last_check" ]] && return 0
@@ -46,36 +46,36 @@ _cli_should_check_updates() {
 }
 
 # Update last check timestamp
-_cli_update_last_check() {
-  local epoch="${1:-$(_cli_current_epoch)}"
-  local cache_dir="$(_cli_get_cache_dir)" || return 1
+_aicli_update_last_check() {
+  local epoch="${1:-$(_aicli_current_epoch)}"
+  local cache_dir="$(_aicli_get_cache_dir)" || return 1
   local last_check_file="$cache_dir/last_check.cache"
 
   echo "$epoch" > "$last_check_file"
 }
 
 # Cache version information for a tool
-_cli_cache_version_info() {
+_aicli_cache_version_info() {
   local tool="$1"
   local current="$2"
   local latest="$3"
 
-  local cache_dir="$(_cli_get_cache_dir)" || return 1
+  local cache_dir="$(_aicli_get_cache_dir)" || return 1
   local cache_file="$cache_dir/${tool}.cache"
 
   cat > "$cache_file" <<EOF
 CURRENT=$current
 LATEST=$latest
-TIMESTAMP=$(_cli_current_epoch)
+TIMESTAMP=$(_aicli_current_epoch)
 EOF
 }
 
 # Get cached version information for a tool
 # Returns 0 if cache exists and is valid, 1 otherwise
 # Sets CLI_CACHED_CURRENT and CLI_CACHED_LATEST variables
-_cli_get_cached_info() {
+_aicli_get_cached_info() {
   local tool="$1"
-  local cache_dir="$(_cli_get_cache_dir)" || return 1
+  local cache_dir="$(_aicli_get_cache_dir)" || return 1
   local cache_file="$cache_dir/${tool}.cache"
 
   [[ ! -f "$cache_file" ]] && return 1
@@ -95,8 +95,8 @@ _cli_get_cached_info() {
 }
 
 # Clear all cache (useful for testing or force refresh)
-_cli_clear_cache() {
-  local cache_dir="$(_cli_get_cache_dir)" || return 1
+_aicli_clear_cache() {
+  local cache_dir="$(_aicli_get_cache_dir)" || return 1
   rm -rf "$cache_dir"/*
   echo "Cache cleared: $cache_dir"
 }
