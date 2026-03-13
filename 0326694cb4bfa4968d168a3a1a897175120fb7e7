@@ -1,0 +1,27 @@
+lib/ui.zsh
+  54e55f3fedbfcc43 62-68,82-84,86,110-116,169-170,173,176-181,183-189,193
+ai-cli.plugin.zsh
+  54e55f3fedbfcc43 10,35,55-64,71,101,123-124,126,131-132,137,139-148,150-161,163-170,210,217,228-229,234-241,243-244,255-263,268,316-319,321
+lib/script-tools.zsh
+  54e55f3fedbfcc43 1-164
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.11",
+  "base_commit_sha": "0326694cb4bfa4968d168a3a1a897175120fb7e7",
+  "prompts": {
+    "54e55f3fedbfcc43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b98fbae8-47d0-4641-8f06-13166f9d7228",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>",
+      "messages": [],
+      "total_additions": 304,
+      "total_deletions": 72,
+      "accepted_lines": 279,
+      "overriden_lines": 0
+    }
+  }
+}
