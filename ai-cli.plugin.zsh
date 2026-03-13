@@ -7,7 +7,7 @@
 
 # Tools to check for updates (gemini, claude, copilot, codex)
 if [[ -z "${AICLI_TOOLS[@]}" ]]; then
-  AICLI_TOOLS=(gemini claude copilot codex)
+  AICLI_TOOLS=(gemini claude copilot codex kiro)
 fi
 
 # Check interval in days
@@ -25,13 +25,6 @@ fi
 # Auto-upgrade confirmation (set to true to require confirmation before upgrades)
 : ${AICLI_AUTO_UPGRADE_CONFIRM:=false}
 
-# Check if npm is available
-if ! command -v npm &>/dev/null; then
-  # Silently disable plugin if npm is not available
-  # Users who need npm will have it installed
-  return 0
-fi
-
 # Get the directory where this plugin is located
 AICLI_PLUGIN_DIR="${0:A:h}"
 
@@ -39,6 +32,7 @@ AICLI_PLUGIN_DIR="${0:A:h}"
 source "${AICLI_PLUGIN_DIR}/lib/cache.zsh"
 source "${AICLI_PLUGIN_DIR}/lib/version-checker.zsh"
 source "${AICLI_PLUGIN_DIR}/lib/npm-tools.zsh"
+source "${AICLI_PLUGIN_DIR}/lib/script-tools.zsh"
 source "${AICLI_PLUGIN_DIR}/lib/ui.zsh"
 
 # Background check hook for precmd
@@ -58,14 +52,23 @@ _aicli_update_check_hook() {
 
     for tool in "${AICLI_TOOLS[@]}"; do
       # Skip if tool is not installed (silently)
-      if ! _aicli_is_tool_installed "$tool"; then
-        continue
-      fi
-
-      # Check for updates
-      if _aicli_check_tool_update "$tool"; then
-        any_updates=true
-        _aicli_show_update_notification "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+      if _aicli_is_script_tool "$tool"; then
+        if ! _aicli_is_script_tool_installed "$tool"; then
+          continue
+        fi
+        if _aicli_check_script_tool_update "$tool"; then
+          any_updates=true
+          _aicli_show_update_notification "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+        fi
+      else
+        if ! _aicli_is_tool_installed "$tool"; then
+          continue
+        fi
+        # Check for updates
+        if _aicli_check_tool_update "$tool"; then
+          any_updates=true
+          _aicli_show_update_notification "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+        fi
       fi
     done
 
@@ -95,7 +98,7 @@ ai-cli-check() {
         echo "  --force, -f     Force check, ignore cache"
         echo "  --help, -h      Show this help message"
         echo ""
-        echo "Tools: gemini, claude, copilot, codex"
+        echo "Tools: gemini, claude, copilot, codex, kiro"
         echo ""
         echo "Examples:"
         echo "  ai-cli-check              # Check all configured tools"
@@ -115,38 +118,56 @@ ai-cli-check() {
     _aicli_clear_cache
   fi
 
-  # Check if npm is available
-  if ! _aicli_check_npm_available; then
-    _aicli_show_status "Error: npm is required for AI CLI update checks" "error"
-    return 1
-  fi
-
   # Check specific tool or all tools
   if [[ -n "$specific_tool" ]]; then
-    # Validate tool
-    if [[ -z "${CLI_NPM_PACKAGES[$specific_tool]}" ]]; then
+    # Validate tool: must be in npm packages or script tools
+    if [[ -z "${CLI_NPM_PACKAGES[$specific_tool]}" ]] && ! _aicli_is_script_tool "$specific_tool"; then
       _aicli_show_status "Error: Unknown tool '$specific_tool'" "error"
-      echo "Available tools: ${(k)CLI_NPM_PACKAGES[@]}"
+      echo "Available tools: ${(k)CLI_NPM_PACKAGES[@]} ${(k)SCRIPT_TOOL_VERSION_COMMANDS[@]}"
       return 1
     fi
 
     # Check if tool is installed
-    if ! _aicli_is_tool_installed "$specific_tool"; then
-      _aicli_show_status "Tool '$specific_tool' is not installed" "warning"
-      return 1
-    fi
-
-    # Check for update
-    if _aicli_check_tool_update "$specific_tool"; then
-      _aicli_show_update_notification "$specific_tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
-    else
-      local current="$(_aicli_get_current_version "$specific_tool")"
-      if [[ -n "$current" ]]; then
-        echo ""
-        _aicli_show_status "${specific_tool}: ${current} (up-to-date)" "success"
-        echo ""
+    if _aicli_is_script_tool "$specific_tool"; then
+      if ! _aicli_is_script_tool_installed "$specific_tool"; then
+        _aicli_show_status "Tool '$specific_tool' is not installed" "warning"
+        return 1
+      fi
+      # Check for update
+      if _aicli_check_script_tool_update "$specific_tool"; then
+        _aicli_show_update_notification "$specific_tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
       else
-        _aicli_show_status "Could not determine version for ${specific_tool}" "error"
+        local current="$(_aicli_get_script_current_version "$specific_tool")"
+        if [[ -n "$current" ]]; then
+          echo ""
+          _aicli_show_status "${specific_tool}: ${current} (up-to-date)" "success"
+          echo ""
+        else
+          _aicli_show_status "Could not determine version for ${specific_tool}" "error"
+        fi
+      fi
+    else
+      if ! _aicli_is_tool_installed "$specific_tool"; then
+        _aicli_show_status "Tool '$specific_tool' is not installed" "warning"
+        return 1
+      fi
+      # Check npm availability only when needed
+      if ! _aicli_check_npm_available; then
+        _aicli_show_status "Error: npm is required to check ${specific_tool}" "error"
+        return 1
+      fi
+      # Check for update
+      if _aicli_check_tool_update "$specific_tool"; then
+        _aicli_show_update_notification "$specific_tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+      else
+        local current="$(_aicli_get_current_version "$specific_tool")"
+        if [[ -n "$current" ]]; then
+          echo ""
+          _aicli_show_status "${specific_tool}: ${current} (up-to-date)" "success"
+          echo ""
+        else
+          _aicli_show_status "Could not determine version for ${specific_tool}" "error"
+        fi
       fi
     fi
   else
@@ -186,13 +207,14 @@ ai-cli-upgrade() {
         echo "  --force, -f     Force check, ignore cache"
         echo "  --help, -h      Show this help message"
         echo ""
-        echo "Tools: gemini, claude, copilot, codex"
+        echo "Tools: gemini, claude, copilot, codex, kiro"
         echo ""
         echo "Examples:"
         echo "  ai-cli-upgrade              # Upgrade all tools automatically"
         echo "  ai-cli-upgrade --confirm    # Upgrade with confirmation"
         echo "  ai-cli-upgrade gemini       # Upgrade only gemini"
         echo "  ai-cli-upgrade claude gemini # Upgrade multiple tools"
+        echo "  ai-cli-upgrade kiro         # Upgrade kiro"
         echo "  ai-cli-upgrade --force      # Force check and upgrade"
         return 0
         ;;
@@ -203,17 +225,23 @@ ai-cli-upgrade() {
     esac
   done
 
-  # Check npm availability
-  if ! _aicli_check_npm_available; then
-    _aicli_show_status "Error: npm is required for upgrades" "error"
-    return 1
-  fi
-
-  # Determine which tools to check
+  # Check npm availability (only needed for npm tools)
+  local npm_tools_present=false
   local tools_to_check=("${specific_tools[@]}")
   if [[ ${#tools_to_check[@]} -eq 0 ]]; then
     tools_to_check=("${AICLI_TOOLS[@]}")
   fi
+  for t in "${tools_to_check[@]}"; do
+    if ! _aicli_is_script_tool "$t"; then
+      npm_tools_present=true
+      break
+    fi
+  done
+  if [[ "$npm_tools_present" == "true" ]] && ! _aicli_check_npm_available; then
+    _aicli_show_status "Warning: npm is not available; npm-based tools will be skipped" "warning"
+  fi
+
+  # Determine which tools to check (already set above)
 
   # Force check by clearing cache if requested
   if [[ "$force" == "true" ]]; then
@@ -224,14 +252,20 @@ ai-cli-upgrade() {
   local tools_to_upgrade=()
 
   for tool in "${tools_to_check[@]}"; do
-    # Skip if tool not installed
-    if ! _aicli_is_tool_installed "$tool"; then
-      continue
-    fi
-
-    # Check for updates
-    if _aicli_check_tool_update "$tool"; then
-      tools_to_upgrade+=("$tool:${CLI_TOOL_CURRENT}:${CLI_TOOL_LATEST}")
+    if _aicli_is_script_tool "$tool"; then
+      if ! _aicli_is_script_tool_installed "$tool"; then
+        continue
+      fi
+      if _aicli_check_script_tool_update "$tool"; then
+        tools_to_upgrade+=("$tool:${CLI_TOOL_CURRENT}:${CLI_TOOL_LATEST}")
+      fi
+    else
+      if ! _aicli_is_tool_installed "$tool"; then
+        continue
+      fi
+      if _aicli_check_tool_update "$tool"; then
+        tools_to_upgrade+=("$tool:${CLI_TOOL_CURRENT}:${CLI_TOOL_LATEST}")
+      fi
     fi
   done
 
@@ -263,7 +297,6 @@ ai-cli-upgrade() {
     local rest="${update_info#*:}"
     local current="${rest%%:*}"
     local latest="${rest##*:}"
-    local package="$(_aicli_get_package_name "$tool")"
 
     # Ask for confirmation if required
     if [[ "$require_confirm" == "true" ]]; then
@@ -280,7 +313,12 @@ ai-cli-upgrade() {
     fi
 
     # Run the upgrade
-    _aicli_run_update "$tool" "$package"
+    if _aicli_is_script_tool "$tool"; then
+      _aicli_upgrade_script_tool "$tool"
+    else
+      local package="$(_aicli_get_package_name "$tool")"
+      _aicli_run_update "$tool" "$package"
+    fi
   done
 
   # Update last check timestamp

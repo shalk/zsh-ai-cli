@@ -58,7 +58,14 @@ _aicli_prompt_update() {
   local tool="$1"
   local current="$2"
   local latest="$3"
-  local package="$(_aicli_get_package_name "$tool")"
+  local package
+  local update_cmd
+  if _aicli_is_script_tool "$tool"; then
+    update_cmd="${SCRIPT_TOOL_UPGRADE_COMMANDS[$tool]}"
+  else
+    package="$(_aicli_get_package_name "$tool")"
+    update_cmd="npm install -g ${package}"
+  fi
 
   echo ""
   echo -e "${CLI_COLOR_YELLOW}Update available for ${tool} CLI!${CLI_COLOR_RESET}"
@@ -72,7 +79,11 @@ _aicli_prompt_update() {
 
   case "$response" in
     y|Y|yes|Yes|YES)
-      _aicli_run_update "$tool" "$package"
+      if _aicli_is_script_tool "$tool"; then
+        _aicli_upgrade_script_tool "$tool"
+      else
+        _aicli_run_update "$tool" "$package"
+      fi
       ;;
     d|D|disable|Disable|DISABLE)
       echo ""
@@ -96,12 +107,17 @@ _aicli_banner_update() {
   local tool="$1"
   local current="$2"
   local latest="$3"
-  local package="$(_aicli_get_package_name "$tool")"
+  local update_cmd
+  if _aicli_is_script_tool "$tool"; then
+    update_cmd="${SCRIPT_TOOL_UPGRADE_COMMANDS[$tool]}"
+  else
+    local package="$(_aicli_get_package_name "$tool")"
+    update_cmd="npm install -g ${package}"
+  fi
 
   local width=45
   local title="Update Available: ${tool}"
   local version_line="Current: ${current} → Latest: ${latest}"
-  local update_cmd="npm install -g ${package}"
 
   echo ""
   echo -e "${CLI_COLOR_YELLOW}╔$(printf '═%.0s' {1..43})╗${CLI_COLOR_RESET}"
@@ -150,17 +166,31 @@ _aicli_show_summary() {
   echo ""
 
   for tool in "${tools[@]}"; do
-    if ! _aicli_is_tool_installed "$tool"; then
-      continue
-    fi
-
-    if _aicli_check_tool_update "$tool"; then
-      updates_available+=("$tool:${CLI_TOOL_CURRENT}:${CLI_TOOL_LATEST}")
-      echo -e "  ${CLI_COLOR_YELLOW}${tool}${CLI_COLOR_RESET}: ${CLI_COLOR_RED}${CLI_TOOL_CURRENT}${CLI_COLOR_RESET} → ${CLI_COLOR_GREEN}${CLI_TOOL_LATEST}${CLI_COLOR_RESET}"
+    if _aicli_is_script_tool "$tool"; then
+      if ! _aicli_is_script_tool_installed "$tool"; then
+        continue
+      fi
+      if _aicli_check_script_tool_update "$tool"; then
+        updates_available+=("$tool:${CLI_TOOL_CURRENT}:${CLI_TOOL_LATEST}")
+        echo -e "  ${CLI_COLOR_YELLOW}${tool}${CLI_COLOR_RESET}: ${CLI_COLOR_RED}${CLI_TOOL_CURRENT}${CLI_COLOR_RESET} → ${CLI_COLOR_GREEN}${CLI_TOOL_LATEST}${CLI_COLOR_RESET}"
+      else
+        local current="$(_aicli_get_script_current_version "$tool")"
+        if [[ -n "$current" ]]; then
+          echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date)"
+        fi
+      fi
     else
-      local current="$(_aicli_get_current_version "$tool")"
-      if [[ -n "$current" ]]; then
-        echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date)"
+      if ! _aicli_is_tool_installed "$tool"; then
+        continue
+      fi
+      if _aicli_check_tool_update "$tool"; then
+        updates_available+=("$tool:${CLI_TOOL_CURRENT}:${CLI_TOOL_LATEST}")
+        echo -e "  ${CLI_COLOR_YELLOW}${tool}${CLI_COLOR_RESET}: ${CLI_COLOR_RED}${CLI_TOOL_CURRENT}${CLI_COLOR_RESET} → ${CLI_COLOR_GREEN}${CLI_TOOL_LATEST}${CLI_COLOR_RESET}"
+      else
+        local current="$(_aicli_get_current_version "$tool")"
+        if [[ -n "$current" ]]; then
+          echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date)"
+        fi
       fi
     fi
   done
