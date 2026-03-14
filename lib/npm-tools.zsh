@@ -20,6 +20,15 @@ CLI_VERSION_COMMANDS=(
   codex      "codex --version"
 )
 
+# Tool to install command mapping
+typeset -gA CLI_INSTALL_COMMANDS
+CLI_INSTALL_COMMANDS=(
+  gemini     "npm install -g @google/gemini-cli"
+  claude     "curl -fsSL https://claude.ai/install.sh | bash"
+  copilot    "npm install -g @github/copilot"
+  codex      "npm install -g @openai/codex"
+)
+
 # Check if a tool is installed
 _aicli_is_tool_installed() {
   local tool="$1"
@@ -138,6 +147,29 @@ _aicli_check_tool_update() {
 _aicli_get_package_name() {
   local tool="$1"
   echo "${CLI_NPM_PACKAGES[$tool]}"
+}
+
+# Get the install command for a supported tool
+_aicli_get_install_command() {
+  local tool="$1"
+
+  if _aicli_is_script_tool "$tool"; then
+    echo "${SCRIPT_TOOL_INSTALL_COMMANDS[$tool]}"
+    return 0
+  fi
+
+  if [[ -n "${CLI_INSTALL_COMMANDS[$tool]}" ]]; then
+    echo "${CLI_INSTALL_COMMANDS[$tool]}"
+    return 0
+  fi
+
+  local package="${CLI_NPM_PACKAGES[$tool]}"
+  if [[ -n "$package" ]]; then
+    echo "npm install -g ${package}"
+    return 0
+  fi
+
+  return 1
 }
 
 # Check if npm is available

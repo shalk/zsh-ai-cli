@@ -143,6 +143,8 @@ ai-cli-check
 ai-cli-check gemini
 ```
 
+If a supported tool is missing, `ai-cli-check` shows `missing` and prints the recommended install command.
+
 #### Force check (ignore cache)
 
 ```bash
@@ -160,6 +162,8 @@ ai-cli-check --help
 ```bash
 ai-cli-upgrade
 ```
+
+`ai-cli-upgrade` only upgrades tools that are already installed. Missing tools are reported and skipped.
 
 #### Upgrade with confirmation for each tool
 
@@ -270,6 +274,8 @@ codex --version
 
 The plugin only checks installed tools.
 
+If you run `ai-cli-check` for a supported tool that is not installed, the plugin reports it as `missing` and shows the install command instead of silently skipping it.
+
 ### Force a fresh check
 
 Clear the cache and check again:
@@ -294,7 +300,7 @@ The plugin is designed to be lightweight:
 - Checks run in background (won't block your prompt)
 - Results are cached to minimize API calls
 - Only checks tools that are actually installed
-- Silently skips unavailable tools
+- Automatic background checks still silently skip unavailable tools
 
 ## Contributing
 

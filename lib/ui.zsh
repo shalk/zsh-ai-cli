@@ -23,6 +23,19 @@ _aicli_setup_colors() {
 
 _aicli_setup_colors
 
+_aicli_show_missing_tool() {
+  local tool="$1"
+  local install_cmd="$(_aicli_get_install_command "$tool")"
+
+  _aicli_show_status "${tool}: missing" "warning"
+
+  if [[ -n "$install_cmd" ]]; then
+    echo -e "  ${CLI_COLOR_CYAN}Install:${CLI_COLOR_RESET} ${install_cmd}"
+  else
+    echo -e "  ${CLI_COLOR_CYAN}Install:${CLI_COLOR_RESET} Install ${tool} manually, then rerun ai-cli-check ${tool}"
+  fi
+}
+
 # Show update notification based on configured style
 _aicli_show_update_notification() {
   local tool="$1"
@@ -160,6 +173,7 @@ _aicli_run_update() {
 _aicli_show_summary() {
   local tools=("$@")
   local updates_available=()
+  local missing_tools=()
 
   echo ""
   echo -e "${CLI_COLOR_CYAN}Checking for updates...${CLI_COLOR_RESET}"
@@ -168,6 +182,8 @@ _aicli_show_summary() {
   for tool in "${tools[@]}"; do
     if _aicli_is_script_tool "$tool"; then
       if ! _aicli_is_script_tool_installed "$tool"; then
+        missing_tools+=("$tool")
+        _aicli_show_missing_tool "$tool"
         continue
       fi
       if _aicli_check_script_tool_update "$tool"; then
@@ -181,6 +197,8 @@ _aicli_show_summary() {
       fi
     else
       if ! _aicli_is_tool_installed "$tool"; then
+        missing_tools+=("$tool")
+        _aicli_show_missing_tool "$tool"
         continue
       fi
       if _aicli_check_tool_update "$tool"; then
@@ -195,13 +213,19 @@ _aicli_show_summary() {
     fi
   done
 
-  if [[ ${#updates_available[@]} -eq 0 ]]; then
+  if [[ ${#updates_available[@]} -eq 0 ]] && [[ ${#missing_tools[@]} -eq 0 ]]; then
     echo ""
     echo -e "${CLI_COLOR_GREEN}All tools are up-to-date!${CLI_COLOR_RESET}"
     echo ""
   else
     echo ""
-    echo -e "${CLI_COLOR_YELLOW}${#updates_available[@]} update(s) available${CLI_COLOR_RESET}"
+    if [[ ${#updates_available[@]} -gt 0 ]]; then
+      echo -e "${CLI_COLOR_YELLOW}${#updates_available[@]} update(s) available${CLI_COLOR_RESET}"
+    fi
+
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+      echo -e "${CLI_COLOR_CYAN}${#missing_tools[@]} tool(s) missing${CLI_COLOR_RESET}"
+    fi
 
     if [[ "${AICLI_NOTIFICATION_STYLE:-prompt}" == "prompt" ]]; then
       echo ""

@@ -92,13 +92,15 @@ ai-cli-check() {
       --help|-h)
         echo "Usage: ai-cli-check [OPTIONS] [TOOL]"
         echo ""
-        echo "Check for AI CLI tool updates"
+        echo "Check AI CLI tool status and available updates"
         echo ""
         echo "Options:"
         echo "  --force, -f     Force check, ignore cache"
         echo "  --help, -h      Show this help message"
         echo ""
         echo "Tools: gemini, claude, copilot, codex, kiro"
+        echo ""
+        echo "Missing tools are shown with install commands."
         echo ""
         echo "Examples:"
         echo "  ai-cli-check              # Check all configured tools"
@@ -130,7 +132,7 @@ ai-cli-check() {
     # Check if tool is installed
     if _aicli_is_script_tool "$specific_tool"; then
       if ! _aicli_is_script_tool_installed "$specific_tool"; then
-        _aicli_show_status "Tool '$specific_tool' is not installed" "warning"
+        _aicli_show_missing_tool "$specific_tool"
         return 1
       fi
       # Check for update
@@ -148,7 +150,7 @@ ai-cli-check() {
       fi
     else
       if ! _aicli_is_tool_installed "$specific_tool"; then
-        _aicli_show_status "Tool '$specific_tool' is not installed" "warning"
+        _aicli_show_missing_tool "$specific_tool"
         return 1
       fi
       # Check npm availability only when needed
@@ -200,7 +202,7 @@ ai-cli-upgrade() {
       --help|-h)
         echo "Usage: ai-cli-upgrade [OPTIONS] [TOOL...]"
         echo ""
-        echo "Upgrade AI CLI tools with available updates"
+        echo "Upgrade installed AI CLI tools with available updates"
         echo ""
         echo "Options:"
         echo "  --confirm, -c   Require confirmation for each tool upgrade"
@@ -208,6 +210,8 @@ ai-cli-upgrade() {
         echo "  --help, -h      Show this help message"
         echo ""
         echo "Tools: gemini, claude, copilot, codex, kiro"
+        echo ""
+        echo "Missing tools are reported and skipped."
         echo ""
         echo "Examples:"
         echo "  ai-cli-upgrade              # Upgrade all tools automatically"
@@ -231,6 +235,15 @@ ai-cli-upgrade() {
   if [[ ${#tools_to_check[@]} -eq 0 ]]; then
     tools_to_check=("${AICLI_TOOLS[@]}")
   fi
+
+  for t in "${tools_to_check[@]}"; do
+    if [[ -z "${CLI_NPM_PACKAGES[$t]}" ]] && ! _aicli_is_script_tool "$t"; then
+      _aicli_show_status "Error: Unknown tool '$t'" "error"
+      echo "Available tools: ${(k)CLI_NPM_PACKAGES[@]} ${(k)SCRIPT_TOOL_VERSION_COMMANDS[@]}"
+      return 1
+    fi
+  done
+
   for t in "${tools_to_check[@]}"; do
     if ! _aicli_is_script_tool "$t"; then
       npm_tools_present=true
@@ -250,10 +263,12 @@ ai-cli-upgrade() {
 
   # Find tools with available updates
   local tools_to_upgrade=()
+  local missing_tools=()
 
   for tool in "${tools_to_check[@]}"; do
     if _aicli_is_script_tool "$tool"; then
       if ! _aicli_is_script_tool_installed "$tool"; then
+        missing_tools+=("$tool")
         continue
       fi
       if _aicli_check_script_tool_update "$tool"; then
@@ -261,6 +276,7 @@ ai-cli-upgrade() {
       fi
     else
       if ! _aicli_is_tool_installed "$tool"; then
+        missing_tools+=("$tool")
         continue
       fi
       if _aicli_check_tool_update "$tool"; then
@@ -272,7 +288,14 @@ ai-cli-upgrade() {
   # If no updates available
   if [[ ${#tools_to_upgrade[@]} -eq 0 ]]; then
     echo ""
-    _aicli_show_status "All tools are up-to-date!" "success"
+    if [[ ${#missing_tools[@]} -eq 0 ]]; then
+      _aicli_show_status "All tools are up-to-date!" "success"
+    else
+      _aicli_show_status "No installed tools with updates." "warning"
+      for tool in "${missing_tools[@]}"; do
+        _aicli_show_missing_tool "$tool"
+      done
+    fi
     echo ""
     return 0
   fi

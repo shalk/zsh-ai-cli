@@ -14,6 +14,12 @@ SCRIPT_TOOL_UPGRADE_COMMANDS=(
   kiro  "kiro-cli update"
 )
 
+# Tool to install command mapping
+typeset -gA SCRIPT_TOOL_INSTALL_COMMANDS
+SCRIPT_TOOL_INSTALL_COMMANDS=(
+  kiro  "curl -fsSL https://cli.kiro.dev/install | bash"
+)
+
 # Tool to latest-version command mapping
 typeset -gA SCRIPT_TOOL_LATEST_VERSION_CMDS
 SCRIPT_TOOL_LATEST_VERSION_CMDS=(
