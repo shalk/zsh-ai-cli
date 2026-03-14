@@ -53,8 +53,8 @@ _aicli_update_check_versions() {
     return 2
   fi
 
-  # Use zsh's built-in is-at-least function
-  # is-at-least returns 0 if $1 >= $2, so we need to invert the logic
+  # Use zsh's built-in is-at-least function.
+  # In zsh, is-at-least <minimum> <actual> returns 0 when <actual> >= <minimum>.
   if is-at-least "$latest" "$current"; then
     # Current is at least latest version (up-to-date)
     return 1

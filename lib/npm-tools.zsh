@@ -29,6 +29,26 @@ CLI_INSTALL_COMMANDS=(
   codex      "npm install -g @openai/codex"
 )
 
+# Run a shell command with timeout when available.
+# Falls back to normal execution if neither timeout nor gtimeout exists.
+_aicli_eval_with_timeout() {
+  local seconds="$1"
+  shift
+  local cmd="$*"
+
+  if command -v timeout &>/dev/null; then
+    timeout "${seconds}s" zsh -c "$cmd"
+    return $?
+  fi
+
+  if command -v gtimeout &>/dev/null; then
+    gtimeout "${seconds}s" zsh -c "$cmd"
+    return $?
+  fi
+
+  eval "$cmd"
+}
+
 # Check if a tool is installed
 _aicli_is_tool_installed() {
   local tool="$1"
@@ -78,7 +98,7 @@ _aicli_get_latest_version() {
   # Query npm registry with timeout
   # Using npm view instead of npm show for better reliability
   local output
-  output=$(timeout 5s npm view "$package" version 2>/dev/null)
+  output=$(_aicli_eval_with_timeout 5 "npm view \"$package\" version" 2>/dev/null)
 
   if [[ $? -eq 0 && -n "$output" ]]; then
     # npm view returns just the version number
@@ -98,8 +118,10 @@ _aicli_get_latest_version() {
 _aicli_check_tool_update() {
   local tool="$1"
 
-  # Global variables to store versions
-  typeset -g CLI_TOOL_CURRENT CLI_TOOL_LATEST
+  # Global variables to store versions and check status metadata
+  typeset -g CLI_TOOL_CURRENT CLI_TOOL_LATEST CLI_TOOL_CHECK_STATUS CLI_TOOL_LATEST_SOURCE
+  CLI_TOOL_CHECK_STATUS="check-failed"
+  CLI_TOOL_LATEST_SOURCE="unknown"
 
   # Check if tool is in our supported list
   if [[ -z "${CLI_NPM_PACKAGES[$tool]}" ]]; then
@@ -123,17 +145,24 @@ _aicli_check_tool_update() {
     # Try to use cached version if available
     if _aicli_get_cached_info "$tool"; then
       CLI_TOOL_LATEST="$CLI_CACHED_LATEST"
+      CLI_TOOL_LATEST_SOURCE="cache"
     else
       return 1
     fi
   else
     # Cache the version info
     _aicli_cache_version_info "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+    CLI_TOOL_LATEST_SOURCE="registry"
   fi
 
   # Compare versions
   if _aicli_update_check_versions "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"; then
+    CLI_TOOL_CHECK_STATUS="update-available"
     return 0  # Update available
+  fi
+
+  if [[ $? -eq 1 ]]; then
+    CLI_TOOL_CHECK_STATUS="up-to-date"
   fi
 
   return 1  # No update needed

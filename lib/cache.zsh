@@ -97,6 +97,8 @@ _aicli_get_cached_info() {
 # Clear all cache (useful for testing or force refresh)
 _aicli_clear_cache() {
   local cache_dir="$(_aicli_get_cache_dir)" || return 1
-  rm -rf "$cache_dir"/*
+  setopt local_options null_glob
+  local cache_files=("$cache_dir"/*)
+  [[ ${#cache_files[@]} -gt 0 ]] && rm -rf -- "${cache_files[@]}"
   echo "Cache cleared: $cache_dir"
 }

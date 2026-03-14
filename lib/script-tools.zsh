@@ -77,7 +77,7 @@ _aicli_get_script_latest_version() {
 
   local output
   if command -v jq &>/dev/null; then
-    output=$(eval "timeout 5s $latest_cmd" 2>/dev/null)
+    output=$(_aicli_eval_with_timeout 5 "$latest_cmd" 2>/dev/null)
   else
     # Fallback: fetch raw JSON and extract version with grep/cut
     local url
@@ -85,7 +85,9 @@ _aicli_get_script_latest_version() {
       kiro) url="https://desktop-release.q.us-east-1.amazonaws.com/latest/manifest.json" ;;
       *)    return 1 ;;
     esac
-    output=$(timeout 5s curl -s "$url" 2>/dev/null | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
+    local raw_json
+    raw_json=$(_aicli_eval_with_timeout 5 "curl -s \"$url\"" 2>/dev/null)
+    output=$(echo "$raw_json" | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
   fi
 
   if [[ -n "$output" ]]; then
@@ -105,7 +107,9 @@ _aicli_get_script_latest_version() {
 _aicli_check_script_tool_update() {
   local tool="$1"
 
-  typeset -g CLI_TOOL_CURRENT CLI_TOOL_LATEST
+  typeset -g CLI_TOOL_CURRENT CLI_TOOL_LATEST CLI_TOOL_CHECK_STATUS CLI_TOOL_LATEST_SOURCE
+  CLI_TOOL_CHECK_STATUS="check-failed"
+  CLI_TOOL_LATEST_SOURCE="unknown"
 
   if ! _aicli_is_script_tool "$tool"; then
     return 1
@@ -124,15 +128,22 @@ _aicli_check_script_tool_update() {
   if [[ -z "$CLI_TOOL_LATEST" ]]; then
     if _aicli_get_cached_info "$tool"; then
       CLI_TOOL_LATEST="$CLI_CACHED_LATEST"
+      CLI_TOOL_LATEST_SOURCE="cache"
     else
       return 1
     fi
   else
     _aicli_cache_version_info "$tool" "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"
+    CLI_TOOL_LATEST_SOURCE="remote"
   fi
 
   if _aicli_update_check_versions "$CLI_TOOL_CURRENT" "$CLI_TOOL_LATEST"; then
+    CLI_TOOL_CHECK_STATUS="update-available"
     return 0
+  fi
+
+  if [[ $? -eq 1 ]]; then
+    CLI_TOOL_CHECK_STATUS="up-to-date"
   fi
 
   return 1

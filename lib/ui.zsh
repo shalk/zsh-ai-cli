@@ -192,7 +192,15 @@ _aicli_show_summary() {
       else
         local current="$(_aicli_get_script_current_version "$tool")"
         if [[ -n "$current" ]]; then
-          echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date)"
+          if [[ "$CLI_TOOL_CHECK_STATUS" == "up-to-date" ]]; then
+            if [[ "$CLI_TOOL_LATEST_SOURCE" == "cache" ]]; then
+              echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date, latest from cache)"
+            else
+              echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date)"
+            fi
+          else
+            echo -e "  ${CLI_COLOR_YELLOW}${tool}${CLI_COLOR_RESET}: ${current} (check failed)"
+          fi
         fi
       fi
     else
@@ -207,7 +215,15 @@ _aicli_show_summary() {
       else
         local current="$(_aicli_get_current_version "$tool")"
         if [[ -n "$current" ]]; then
-          echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date)"
+          if [[ "$CLI_TOOL_CHECK_STATUS" == "up-to-date" ]]; then
+            if [[ "$CLI_TOOL_LATEST_SOURCE" == "cache" ]]; then
+              echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date, latest from cache)"
+            else
+              echo -e "  ${CLI_COLOR_GREEN}${tool}${CLI_COLOR_RESET}: ${current} (up-to-date)"
+            fi
+          else
+            echo -e "  ${CLI_COLOR_YELLOW}${tool}${CLI_COLOR_RESET}: ${current} (check failed)"
+          fi
         fi
       fi
     fi

@@ -142,7 +142,15 @@ ai-cli-check() {
         local current="$(_aicli_get_script_current_version "$specific_tool")"
         if [[ -n "$current" ]]; then
           echo ""
-          _aicli_show_status "${specific_tool}: ${current} (up-to-date)" "success"
+          if [[ "$CLI_TOOL_CHECK_STATUS" == "up-to-date" ]]; then
+            if [[ "$CLI_TOOL_LATEST_SOURCE" == "cache" ]]; then
+              _aicli_show_status "${specific_tool}: ${current} (up-to-date, latest from cache)" "success"
+            else
+              _aicli_show_status "${specific_tool}: ${current} (up-to-date)" "success"
+            fi
+          else
+            _aicli_show_status "${specific_tool}: ${current} (check failed)" "warning"
+          fi
           echo ""
         else
           _aicli_show_status "Could not determine version for ${specific_tool}" "error"
@@ -165,7 +173,15 @@ ai-cli-check() {
         local current="$(_aicli_get_current_version "$specific_tool")"
         if [[ -n "$current" ]]; then
           echo ""
-          _aicli_show_status "${specific_tool}: ${current} (up-to-date)" "success"
+          if [[ "$CLI_TOOL_CHECK_STATUS" == "up-to-date" ]]; then
+            if [[ "$CLI_TOOL_LATEST_SOURCE" == "cache" ]]; then
+              _aicli_show_status "${specific_tool}: ${current} (up-to-date, latest from cache)" "success"
+            else
+              _aicli_show_status "${specific_tool}: ${current} (up-to-date)" "success"
+            fi
+          else
+            _aicli_show_status "${specific_tool}: ${current} (check failed)" "warning"
+          fi
           echo ""
         else
           _aicli_show_status "Could not determine version for ${specific_tool}" "error"
