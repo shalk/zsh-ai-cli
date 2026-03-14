@@ -17,7 +17,7 @@ An Oh-My-Zsh plugin that automatically checks for updates to your AI CLI develop
 |------|-------------|---------|
 | Gemini CLI | `@google/gemini-cli` | `gemini` |
 | Claude Code | `claude-code` | `claude` |
-| GitHub Copilot | `@github/copilot` | `gh copilot` |
+| GitHub Copilot | `@github/copilot` | `copilot` |
 | OpenAI Codex | `@openai/codex` | `codex` |
 
 ## Installation
@@ -268,7 +268,7 @@ Check if tools are installed:
 ```bash
 gemini --version
 claude --version
-gh copilot --version
+copilot --version
 codex --version
 ```
 

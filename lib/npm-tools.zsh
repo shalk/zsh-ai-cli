@@ -16,7 +16,7 @@ typeset -gA CLI_VERSION_COMMANDS
 CLI_VERSION_COMMANDS=(
   gemini     "gemini --version"
   claude     "claude --version"
-  copilot    "gh copilot --version"
+  copilot    "copilot --version"
   codex      "codex --version"
 )
 
@@ -32,12 +32,8 @@ CLI_INSTALL_COMMANDS=(
 # Check if a tool is installed
 _aicli_is_tool_installed() {
   local tool="$1"
-  local cmd="${tool}"
 
-  # Special case for copilot (uses gh CLI)
-  [[ "$tool" == "copilot" ]] && cmd="gh"
-
-  command -v "$cmd" &>/dev/null
+  command -v "$tool" &>/dev/null
 }
 
 # Get current installed version of a tool
