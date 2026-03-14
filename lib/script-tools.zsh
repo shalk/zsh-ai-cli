@@ -142,10 +142,7 @@ _aicli_check_script_tool_update() {
     return 0
   fi
 
-  if [[ $? -eq 1 ]]; then
-    CLI_TOOL_CHECK_STATUS="up-to-date"
-  fi
-
+  CLI_TOOL_CHECK_STATUS="up-to-date"
   return 1
 }
 

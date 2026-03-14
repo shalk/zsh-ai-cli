@@ -161,10 +161,7 @@ _aicli_check_tool_update() {
     return 0  # Update available
   fi
 
-  if [[ $? -eq 1 ]]; then
-    CLI_TOOL_CHECK_STATUS="up-to-date"
-  fi
-
+  CLI_TOOL_CHECK_STATUS="up-to-date"
   return 1  # No update needed
 }
 
