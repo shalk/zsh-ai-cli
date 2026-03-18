@@ -16,14 +16,11 @@ fi
 # Enable automatic checking on shell start
 : ${AICLI_AUTO_CHECK:=true}
 
-# Notification style: prompt, banner, or silent
-: ${AICLI_NOTIFICATION_STYLE:=prompt}
+# Notification style: banner or silent
+: ${AICLI_NOTIFICATION_STYLE:=banner}
 
 # Cache directory location
-: ${AICLI_CACHE_DIR:=${ZSH_CACHE_DIR:-$HOME/.cache/oh-my-zsh}/ai-cli}
-
-# Auto-upgrade confirmation (set to true to require confirmation before upgrades)
-: ${AICLI_AUTO_UPGRADE_CONFIRM:=false}
+: ${AICLI_CACHE_DIR:=${ZSH_CACHE_DIR:-$HOME/.cache}/ai-cli}
 
 # Get the directory where this plugin is located
 AICLI_PLUGIN_DIR="${0:A:h}"
@@ -200,7 +197,7 @@ ai-cli-check() {
 # Upgrade command
 ai-cli-upgrade() {
   # Parse flags
-  local require_confirm=${AICLI_AUTO_UPGRADE_CONFIRM:-false}
+  local require_confirm=false
   local specific_tools=()
   local force=false
 

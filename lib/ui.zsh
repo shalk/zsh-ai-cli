@@ -42,18 +42,9 @@ _aicli_show_update_notification() {
   local current="$2"
   local latest="$3"
 
-  local style="${AICLI_NOTIFICATION_STYLE:-prompt}"
-
-  # If stdin is not available (background process) and style is interactive,
-  # fall back to non-interactive banner mode
-  if [[ ! -t 0 ]] && [[ "$style" == "prompt" ]]; then
-    style="banner"
-  fi
+  local style="${AICLI_NOTIFICATION_STYLE:-banner}"
 
   case "$style" in
-    prompt)
-      _aicli_prompt_update "$tool" "$current" "$latest"
-      ;;
     banner)
       _aicli_banner_update "$tool" "$current" "$latest"
       ;;
@@ -62,55 +53,6 @@ _aicli_show_update_notification() {
       ;;
     *)
       _aicli_banner_update "$tool" "$current" "$latest"
-      ;;
-  esac
-}
-
-# Interactive prompt mode
-_aicli_prompt_update() {
-  local tool="$1"
-  local current="$2"
-  local latest="$3"
-  local package
-  local update_cmd
-  if _aicli_is_script_tool "$tool"; then
-    update_cmd="${SCRIPT_TOOL_UPGRADE_COMMANDS[$tool]}"
-  else
-    package="$(_aicli_get_package_name "$tool")"
-    update_cmd="npm install -g ${package}"
-  fi
-
-  echo ""
-  echo -e "${CLI_COLOR_YELLOW}Update available for ${tool} CLI!${CLI_COLOR_RESET}"
-  echo -e "  Current: ${CLI_COLOR_RED}${current}${CLI_COLOR_RESET}"
-  echo -e "  Latest:  ${CLI_COLOR_GREEN}${latest}${CLI_COLOR_RESET}"
-  echo ""
-  echo -n "Update now? [y/N/d(isable)] "
-
-  # Read user input
-  read -r response
-
-  case "$response" in
-    y|Y|yes|Yes|YES)
-      if _aicli_is_script_tool "$tool"; then
-        _aicli_upgrade_script_tool "$tool"
-      else
-        _aicli_run_update "$tool" "$package"
-      fi
-      ;;
-    d|D|disable|Disable|DISABLE)
-      echo ""
-      echo -e "${CLI_COLOR_CYAN}To disable update checks for ${tool}, add this to your .zshrc:${CLI_COLOR_RESET}"
-      echo ""
-      echo "  AICLI_TOOLS=(\${AICLI_TOOLS[@]:#${tool}})"
-      echo ""
-      echo -e "${CLI_COLOR_CYAN}Or to disable all automatic checks:${CLI_COLOR_RESET}"
-      echo ""
-      echo "  AICLI_AUTO_CHECK=false"
-      echo ""
-      ;;
-    *)
-      echo "Skipped. Run 'ai-cli-check ${tool}' to check again."
       ;;
   esac
 }
@@ -235,25 +177,8 @@ _aicli_show_summary() {
     echo ""
   else
     echo ""
-    if [[ ${#updates_available[@]} -gt 0 ]]; then
-      echo -e "${CLI_COLOR_YELLOW}${#updates_available[@]} update(s) available${CLI_COLOR_RESET}"
-    fi
-
-    if [[ ${#missing_tools[@]} -gt 0 ]]; then
-      echo -e "${CLI_COLOR_CYAN}${#missing_tools[@]} tool(s) missing${CLI_COLOR_RESET}"
-    fi
-
-    if [[ "${AICLI_NOTIFICATION_STYLE:-prompt}" == "prompt" ]]; then
-      echo ""
-      for update_info in "${updates_available[@]}"; do
-        local tool="${update_info%%:*}"
-        local rest="${update_info#*:}"
-        local current="${rest%%:*}"
-        local latest="${rest##*:}"
-
-        _aicli_prompt_update "$tool" "$current" "$latest"
-      done
-    fi
+    echo -e "${CLI_COLOR_YELLOW}${#updates_available[@]} update(s) available. Run 'ai-cli-upgrade' to update.${CLI_COLOR_RESET}"
+    echo ""
   fi
 }
 
