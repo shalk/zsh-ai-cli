@@ -1,0 +1,25 @@
+lib/npm-tools.zsh
+  6b0a62d365f4a960 12,22
+ai-cli.plugin.zsh
+  6b0a62d365f4a960 10,98,103,208,216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.15",
+  "base_commit_sha": "03bd597411bfbaf6070269a4219c470f4599f1d6",
+  "prompts": {
+    "6b0a62d365f4a960": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c8e23714-426d-412c-9a78-03b8b0e7ae9d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 3,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
