@@ -1,0 +1,23 @@
+lib/ui.zsh
+  6b0a62d365f4a960 126-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.15",
+  "base_commit_sha": "9a9e23c989e58f6ff158b6a4a850f7654296b799",
+  "prompts": {
+    "6b0a62d365f4a960": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c8e23714-426d-412c-9a78-03b8b0e7ae9d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 0,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
