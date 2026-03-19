@@ -9,6 +9,7 @@ CLI_NPM_PACKAGES=(
   claude     "claude-code"
   copilot    "@github/copilot"
   codex      "@openai/codex"
+  crush      "@charmland/crush"
 )
 
 # Tool to version command mapping
@@ -18,6 +19,7 @@ CLI_VERSION_COMMANDS=(
   claude     "claude --version"
   copilot    "copilot --version"
   codex      "codex --version"
+  crush      "crush --version"
 )
 
 # Tool to install command mapping

@@ -7,7 +7,7 @@
 
 # Tools to check for updates (gemini, claude, copilot, codex)
 if [[ -z "${AICLI_TOOLS[@]}" ]]; then
-  AICLI_TOOLS=(gemini claude copilot codex kiro)
+  AICLI_TOOLS=(gemini claude copilot codex kiro crush)
 fi
 
 # Check interval in days
@@ -95,13 +95,14 @@ ai-cli-check() {
         echo "  --force, -f     Force check, ignore cache"
         echo "  --help, -h      Show this help message"
         echo ""
-        echo "Tools: gemini, claude, copilot, codex, kiro"
+        echo "Tools: gemini, claude, copilot, codex, kiro, crush"
         echo ""
         echo "Missing tools are shown with install commands."
         echo ""
         echo "Examples:"
         echo "  ai-cli-check              # Check all configured tools"
         echo "  ai-cli-check gemini       # Check only gemini"
+        echo "  ai-cli-check crush        # Check only crush"
         echo "  ai-cli-check --force      # Force check all tools"
         return 0
         ;;
@@ -222,7 +223,7 @@ ai-cli-upgrade() {
         echo "  --force, -f     Force check, ignore cache"
         echo "  --help, -h      Show this help message"
         echo ""
-        echo "Tools: gemini, claude, copilot, codex, kiro"
+        echo "Tools: gemini, claude, copilot, codex, kiro, crush"
         echo ""
         echo "Missing tools are reported and skipped."
         echo ""
@@ -232,6 +233,7 @@ ai-cli-upgrade() {
         echo "  ai-cli-upgrade gemini       # Upgrade only gemini"
         echo "  ai-cli-upgrade claude gemini # Upgrade multiple tools"
         echo "  ai-cli-upgrade kiro         # Upgrade kiro"
+        echo "  ai-cli-upgrade crush        # Upgrade crush"
         echo "  ai-cli-upgrade --force      # Force check and upgrade"
         return 0
         ;;
