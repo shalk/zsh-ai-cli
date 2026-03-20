@@ -30,6 +30,7 @@ source "${AICLI_PLUGIN_DIR}/lib/cache.zsh"
 source "${AICLI_PLUGIN_DIR}/lib/version-checker.zsh"
 source "${AICLI_PLUGIN_DIR}/lib/npm-tools.zsh"
 source "${AICLI_PLUGIN_DIR}/lib/script-tools.zsh"
+source "${AICLI_PLUGIN_DIR}/lib/dependency-tools.zsh"
 source "${AICLI_PLUGIN_DIR}/lib/ui.zsh"
 
 # Background check hook for precmd
@@ -78,12 +79,17 @@ _aicli_update_check_hook() {
 ai-cli-check() {
   local force=false
   local specific_tool=""
+  local check_deps=false
 
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --force|-f)
         force=true
+        shift
+        ;;
+      --deps|-d)
+        check_deps=true
         shift
         ;;
       --help|-h)
@@ -93,6 +99,7 @@ ai-cli-check() {
         echo ""
         echo "Options:"
         echo "  --force, -f     Force check, ignore cache"
+        echo "  --deps, -d      Check dependency tools (nvm, node, npm)"
         echo "  --help, -h      Show this help message"
         echo ""
         echo "Tools: gemini, claude, copilot, codex, kiro, crush"
@@ -104,6 +111,7 @@ ai-cli-check() {
         echo "  ai-cli-check gemini       # Check only gemini"
         echo "  ai-cli-check crush        # Check only crush"
         echo "  ai-cli-check --force      # Force check all tools"
+        echo "  ai-cli-check --deps       # Check dependency tools"
         return 0
         ;;
       *)
@@ -112,6 +120,12 @@ ai-cli-check() {
         ;;
     esac
   done
+  
+  # Check dependencies if requested
+  if [[ "$check_deps" == "true" ]]; then
+    _aicli_show_dependencies_summary
+    return 0
+  fi
 
   # Force check by clearing cache
   if [[ "$force" == "true" ]]; then

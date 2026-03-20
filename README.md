@@ -93,10 +93,42 @@ AICLI_TOOLS=(${AICLI_TOOLS[@]:#codex})
 | `ai-cli-check` | Check all configured tools for updates |
 | `ai-cli-check <tool>` | Check a specific tool |
 | `ai-cli-check --force` | Force check, ignoring cache |
+| `ai-cli-check --deps` | Check dependency tools (nvm, node, npm) |
 | `ai-cli-upgrade` | Upgrade all tools with available updates |
 | `ai-cli-upgrade <tool>` | Upgrade a specific tool |
 | `ai-cli-upgrade --confirm` | Upgrade with per-tool confirmation |
 | `ai-cli-upgrade --force` | Force check then upgrade |
+
+## Dependency Check
+
+Check if fundamental dependencies (nvm, node, npm) are installed:
+
+```bash
+ai-cli-check --deps
+```
+
+This will show:
+- Current versions of installed tools
+- Install commands for missing tools
+- Upgrade commands for installed tools
+
+Example output:
+```
+Checking dependency tools...
+
+  nvm: 0.40.4
+    Upgrade: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+
+  node: 20.11.0
+    Upgrade: nvm install node --reinstall-packages-from=current
+
+  npm: 10.2.4
+    Upgrade: npm install -g npm@latest
+
+All dependency tools are installed!
+```
+
+**Note:** The `ai-cli-upgrade` command does not upgrade dependency tools (nvm, node, npm). Use the suggested upgrade commands manually as these tools require careful version management.
 
 ## Notification Styles
 

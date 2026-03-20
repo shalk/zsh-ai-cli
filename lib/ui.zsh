@@ -202,3 +202,49 @@ _aicli_show_status() {
       ;;
   esac
 }
+
+# Show dependencies summary
+_aicli_show_dependencies_summary() {
+  echo ""
+  echo -e "${CLI_COLOR_CYAN}Checking dependency tools...${CLI_COLOR_RESET}"
+  echo ""
+  
+  local deps=(nvm node npm)
+  local any_missing=false
+  
+  for dep in "${deps[@]}"; do
+    if _aicli_check_dependency "$dep"; then
+      local dep_status="${DEP_TOOL_STATUS}"
+      local dep_version="${DEP_TOOL_VERSION}"
+      local dep_install_cmd="${DEP_TOOL_INSTALL_CMD}"
+      local dep_upgrade_cmd="${DEP_TOOL_UPGRADE_CMD}"
+      
+      case "$dep_status" in
+        installed)
+          echo -e "  ${CLI_COLOR_GREEN}${dep}${CLI_COLOR_RESET}: ${CLI_COLOR_CYAN}${dep_version}${CLI_COLOR_RESET}"
+          if [[ -n "$dep_upgrade_cmd" ]]; then
+            echo -e "    ${CLI_COLOR_BLUE}Upgrade:${CLI_COLOR_RESET} ${dep_upgrade_cmd}"
+          fi
+          ;;
+        missing)
+          any_missing=true
+          echo -e "  ${CLI_COLOR_YELLOW}${dep}${CLI_COLOR_RESET}: ${CLI_COLOR_RED}missing${CLI_COLOR_RESET}"
+          if [[ -n "$dep_install_cmd" ]]; then
+            echo -e "    ${CLI_COLOR_BLUE}Install:${CLI_COLOR_RESET} ${dep_install_cmd}"
+          fi
+          ;;
+        error)
+          echo -e "  ${CLI_COLOR_RED}${dep}${CLI_COLOR_RESET}: ${CLI_COLOR_RED}error detecting version${CLI_COLOR_RESET}"
+          ;;
+      esac
+      echo ""
+    fi
+  done
+  
+  if [[ "$any_missing" == "false" ]]; then
+    echo -e "${CLI_COLOR_GREEN}All dependency tools are installed!${CLI_COLOR_RESET}"
+  else
+    echo -e "${CLI_COLOR_YELLOW}Some dependency tools are missing. Install them to use npm-based AI CLI tools.${CLI_COLOR_RESET}"
+  fi
+  echo ""
+}
