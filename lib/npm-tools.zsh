@@ -6,7 +6,6 @@
 typeset -gA CLI_NPM_PACKAGES
 CLI_NPM_PACKAGES=(
   gemini     "@google/gemini-cli"
-  claude     "claude-code"
   copilot    "@github/copilot"
   codex      "@openai/codex"
   crush      "@charmland/crush"
@@ -16,7 +15,6 @@ CLI_NPM_PACKAGES=(
 typeset -gA CLI_VERSION_COMMANDS
 CLI_VERSION_COMMANDS=(
   gemini     "gemini --version"
-  claude     "claude --version"
   copilot    "copilot --version"
   codex      "codex --version"
   crush      "crush --version"
@@ -26,7 +24,6 @@ CLI_VERSION_COMMANDS=(
 typeset -gA CLI_INSTALL_COMMANDS
 CLI_INSTALL_COMMANDS=(
   gemini     "npm install -g @google/gemini-cli"
-  claude     "curl -fsSL https://claude.ai/install.sh | bash"
   copilot    "npm install -g @github/copilot"
   codex      "npm install -g @openai/codex"
 )

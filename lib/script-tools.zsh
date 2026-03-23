@@ -5,25 +5,29 @@
 # Tool to version command mapping
 typeset -gA SCRIPT_TOOL_VERSION_COMMANDS
 SCRIPT_TOOL_VERSION_COMMANDS=(
-  kiro  "kiro-cli --version"
+  kiro    "kiro-cli --version"
+  claude  "claude --version"
 )
 
 # Tool to upgrade command mapping
 typeset -gA SCRIPT_TOOL_UPGRADE_COMMANDS
 SCRIPT_TOOL_UPGRADE_COMMANDS=(
-  kiro  "kiro-cli update"
+  kiro    "kiro-cli update"
+  claude  "claude update"
 )
 
 # Tool to install command mapping
 typeset -gA SCRIPT_TOOL_INSTALL_COMMANDS
 SCRIPT_TOOL_INSTALL_COMMANDS=(
-  kiro  "curl -fsSL https://cli.kiro.dev/install | bash"
+  kiro    "curl -fsSL https://cli.kiro.dev/install | bash"
+  claude  "curl -fsSL https://claude.ai/install.sh | bash"
 )
 
 # Tool to latest-version command mapping
 typeset -gA SCRIPT_TOOL_LATEST_VERSION_CMDS
 SCRIPT_TOOL_LATEST_VERSION_CMDS=(
-  kiro  "curl -s https://desktop-release.q.us-east-1.amazonaws.com/latest/manifest.json | jq -r '.version'"
+  kiro    "curl -s https://desktop-release.q.us-east-1.amazonaws.com/latest/manifest.json | jq -r '.version'"
+  claude  "curl -s https://api.github.com/repos/anthropics/claude-code/releases/latest | jq -r '.tag_name'"
 )
 
 # Check if a tool is a script tool (non-npm)
@@ -80,14 +84,17 @@ _aicli_get_script_latest_version() {
     output=$(_aicli_eval_with_timeout 5 "$latest_cmd" 2>/dev/null)
   else
     # Fallback: fetch raw JSON and extract version with grep/cut
-    local url
+    local url field
     case "$tool" in
-      kiro) url="https://desktop-release.q.us-east-1.amazonaws.com/latest/manifest.json" ;;
-      *)    return 1 ;;
+      kiro)   url="https://desktop-release.q.us-east-1.amazonaws.com/latest/manifest.json"
+              field="version" ;;
+      claude) url="https://api.github.com/repos/anthropics/claude-code/releases/latest"
+              field="tag_name" ;;
+      *)      return 1 ;;
     esac
     local raw_json
     raw_json=$(_aicli_eval_with_timeout 5 "curl -s \"$url\"" 2>/dev/null)
-    output=$(echo "$raw_json" | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
+    output=$(echo "$raw_json" | grep -o "\"${field}\":\"[^\"]*\"" | cut -d'"' -f4)
   fi
 
   if [[ -n "$output" ]]; then
