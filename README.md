@@ -1,3 +1,10 @@
+> [!WARNING]
+> **This project is archived and no longer maintained.**
+>
+> It has been superseded by [shalk/my-mise](https://github.com/shalk/my-mise), which uses [mise](https://mise.jdx.dev/) to manage AI CLI tools and development environments in a more flexible and powerful way.
+>
+> No further updates will be made to this repository.
+
 # zsh-ai-cli
 
 A zsh plugin that checks for updates to AI CLI development tools and notifies you when new versions are available.
