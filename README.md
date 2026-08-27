@@ -1,9 +1,9 @@
-> [!WARNING]
-> **This project is archived and no longer maintained.**
+> [!NOTE]
+> **This project is archived and no longer actively maintained.**
 >
-> It has been superseded by [shalk/my-mise](https://github.com/shalk/my-mise), which uses [mise](https://mise.jdx.dev/) to manage AI CLI tools and development environments in a more flexible and powerful way.
+> I've personally switched to [shalk/my-mise](https://github.com/shalk/my-mise), which uses [mise](https://mise.jdx.dev/) to manage AI CLI tools and development environments in a more flexible and powerful way.
 >
-> No further updates will be made to this repository.
+> That said, this plugin remains a lightweight, dependency-free option if you don't need `mise` and just want simple update checks for your AI CLI tools. It still works, but don't expect further updates.
 
 # zsh-ai-cli
 
