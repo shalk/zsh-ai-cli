@@ -1,0 +1,21 @@
+LICENSE
+  s_b4b20575cba6b2::t_f9287fdd5d6d2e 1-21
+README.md
+  s_b4b20575cba6b2::t_e7585aa229b4cb 1-2,4,6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "380605c5002e8fd3516923b351f2ca8eebcb7e63",
+  "prompts": {},
+  "sessions": {
+    "s_b4b20575cba6b2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7577186d-bf17-4086-b7df-fa96cce50824",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "shalk(xiao kun) <xshalk@outlook.com>"
+    }
+  }
+}
